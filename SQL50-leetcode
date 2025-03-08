@@ -185,5 +185,72 @@ FROM (
         GROUP BY customer_id
     )
 ) first_orders;
-
+-- 
 --550. Game Play Analysis IV
+SELECT
+  ROUND(COUNT(DISTINCT player_id) / (SELECT COUNT(DISTINCT player_id) FROM Activity), 2) AS fraction
+FROM
+  Activity
+WHERE
+  (player_id, DATE_SUB(event_date, INTERVAL 1 DAY))
+  IN (
+    SELECT player_id, MIN(event_date) AS first_login FROM Activity GROUP BY player_id
+  )
+
+  --2356. Number of Unique Subjects Taught by Each Teacher
+SELECT teacher_id, COUNT(DISTINCT subject_id) AS cnt
+FROM Teacher
+GROUP BY teacher_id;
+
+
+--1141. User Activity for the Past 30 Days I
+SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
+FROM Activity
+WHERE activity_date BETWEEN DATE('2019-07-27') - INTERVAL 29 DAY AND DATE('2019-07-27')
+GROUP BY activity_date;
+
+--1070. Product Sales Analysis III
+SELECT s.product_id, s.year AS first_year, s.quantity, s.price
+FROM Sales s
+WHERE s.year = (SELECT MIN(year) FROM Sales WHERE product_id = s.product_id);
+
+-- NOW IN PANDAS/PYTHON
+
+--1070. Product Sales Analysis III
+import pandas as pd
+
+def sales_analysis(sales: pd.DataFrame, product: pd.DataFrame) -> pd.DataFrame:
+  df = sales.groupby('product_id', as_index=False)['year'].min()
+  return sales.merge(df, on='product_id', how='inner')\
+    .query('year_x == year_y')\
+    .rename(columns={'year_x': 'first_year'})\
+    [['product_id', 'first_year', 'quantity', 'price']]
+
+
+--596. Classes More Than 5 Students
+SELECT class
+FROM Courses
+GROUP BY class
+HAVING COUNT(student) >= 5;
+
+--1729. Find Followers Count
+SELECT user_id, count(follower_id) as followers_count
+FROM Followers
+GROUP by user_id
+ORDER BY user_id ASC
+
+--619. Biggest Single Number
+SELECT MAX(num) AS num
+FROM MyNumbers
+WHERE num IN (
+    SELECT num
+    FROM MyNumbers
+    GROUP BY num
+    HAVING COUNT(num) = 1
+);
+
+--1045. Customers Who Bought All Products
+SELECT customer_id
+FROM Customer
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(*) FROM Product);
