@@ -214,19 +214,6 @@ SELECT s.product_id, s.year AS first_year, s.quantity, s.price
 FROM Sales s
 WHERE s.year = (SELECT MIN(year) FROM Sales WHERE product_id = s.product_id);
 
--- NOW IN PANDAS/PYTHON
-
---1070. Product Sales Analysis III
-import pandas as pd
-
-def sales_analysis(sales: pd.DataFrame, product: pd.DataFrame) -> pd.DataFrame:
-  df = sales.groupby('product_id', as_index=False)['year'].min()
-  return sales.merge(df, on='product_id', how='inner')\
-    .query('year_x == year_y')\
-    .rename(columns={'year_x': 'first_year'})\
-    [['product_id', 'first_year', 'quantity', 'price']]
-
-
 --596. Classes More Than 5 Students
 SELECT class
 FROM Courses
@@ -272,3 +259,58 @@ FROM Logs l1
 JOIN Logs l2 ON l1.id = l2.id - 1
 JOIN Logs l3 ON l1.id = l3.id - 2
 WHERE l1.num = l2.num AND l2.num = l3.num;
+
+--1164. Product Price at a Given Date
+SELECT DISTINCT 
+    product_id, 
+    10 AS price 
+FROM Products 
+WHERE product_id NOT IN (
+    SELECT DISTINCT product_id 
+    FROM Products 
+    WHERE change_date <= '2019-08-16'
+)
+
+UNION 
+SELECT 
+    p.product_id, 
+    p.new_price AS price 
+FROM Products p
+WHERE (p.product_id, p.change_date) IN (
+    SELECT product_id, MAX(change_date) 
+    FROM Products 
+    WHERE change_date <= '2019-08-16' 
+    GROUP BY product_id
+);
+
+--1204. Last Person to Fit in the Bus
+WITH CumulativeWeight AS (
+    SELECT 
+        person_name, 
+        weight,
+        turn,
+        SUM(weight) OVER (ORDER BY turn) AS total_weight
+    FROM Queue
+)
+SELECT person_name
+FROM CumulativeWeight
+WHERE total_weight <= 1000
+ORDER BY total_weight DESC
+LIMIT 1;
+
+--1907. Count Salary Categories
+SELECT 'Low Salary' AS category, COUNT(*) AS accounts_count
+FROM Accounts
+WHERE income < 20000
+
+UNION ALL
+
+SELECT 'Average Salary' AS category, COUNT(*) AS accounts_count
+FROM Accounts
+WHERE income BETWEEN 20000 AND 50000
+
+UNION ALL
+
+SELECT 'High Salary' AS category, COUNT(*) AS accounts_count
+FROM Accounts
+WHERE income > 50000;
