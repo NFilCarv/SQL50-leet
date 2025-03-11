@@ -314,3 +314,54 @@ UNION ALL
 SELECT 'High Salary' AS category, COUNT(*) AS accounts_count
 FROM Accounts
 WHERE income > 50000;
+
+--1667. Fix Names in a Table
+SELECT user_id, 
+    CONCAT(UPPER(SUBSTRING(name,1,1)), LOWER(SUBSTRING(name,2))) as name
+FROM Users
+ORDER BY user_id;
+
+--1527. Patients With a Condition
+SELECT patient_id, patient_name, conditions
+FROM Patients
+WHERE conditions LIKE 'DIAB1%' 
+   OR conditions LIKE '% DIAB1%';
+
+
+--196. Delete Duplicate Emails
+
+DELETE p FROM Person p
+JOIN Person p2 
+ON p.Email = p2.Email AND p.Id > p2.Id;
+
+--176. Second Highest Salary
+SELECT 
+    (SELECT DISTINCT salary 
+     FROM EMPLOYEE 
+     ORDER BY salary DESC 
+     LIMIT 1 OFFSET 1) 
+    AS SecondHighestSalary;
+
+--1484. Group Sold Products By The Date
+SELECT 
+    sell_date, 
+    COUNT(DISTINCT product) AS num_sold, 
+    GROUP_CONCAT(DISTINCT product ORDER BY product SEPARATOR ',') AS products
+FROM Activities
+GROUP BY sell_date
+ORDER BY sell_date;
+
+--1327. List the Products Ordered in a Period
+SELECT p.product_name, SUM(o.unit) AS unit
+FROM Orders o
+JOIN Products p ON o.product_id = p.product_id
+WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '2020-02'
+GROUP BY p.product_id, p.product_name
+HAVING SUM(o.unit) >= 100;
+
+
+--1517. Find Users With Valid E-Mails
+
+SELECT *
+FROM Users
+WHERE mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
