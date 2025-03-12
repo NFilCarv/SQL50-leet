@@ -365,3 +365,14 @@ HAVING SUM(o.unit) >= 100;
 SELECT *
 FROM Users
 WHERE mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
+
+--1978. Employees Whose Manager Left the Company
+SELECT
+    employee_id
+FROM 
+    employees
+WHERE
+    salary < 30000
+    AND manager_id NOT IN (SELECT employee_id FROM employees)
+ORDER BY 
+    employee_id;
